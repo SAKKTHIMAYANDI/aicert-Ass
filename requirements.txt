@@ -1,0 +1,24 @@
+# FastAPI and related dependencies
+fastapi
+uvicorn
+pymongo
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+pydantic[email]
+jinja2
+
+# LangChain and RAG dependencies
+langchain>=0.2.0
+langchain-community>=0.0.30
+sentence-transformers
+faiss-cpu  # Use faiss-gpu if on a GPU machine
+numpy
+cryptography
+langchain-huggingface
+
+openai>=1.0.0
+faiss-cpu  # or faiss-gpu if you have CUDA
+pymongo
+numpy
+python-dotenv

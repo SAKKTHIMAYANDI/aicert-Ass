@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+{% block header %}Login to Your Account{% endblock %}
+
+{% block content %}
+  <form action="/login" method="post">
+    <div style="margin-bottom: 1.5rem;">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required style="width: 100%; padding: 0.75rem;">
+    </div>
+    <div style="margin-bottom: 1.5rem;">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required style="width: 100%; padding: 0.75rem;">
+    </div>
+    <button type="submit" style="width: 100%; padding: 0.75rem; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Login</button>
+  </form>
+  <div style="text-align: center; margin-top: 1rem;">
+    Don't have an account? <a href="/register" style="color: #007bff;">Register here</a>
+  </div>
+{% endblock %}

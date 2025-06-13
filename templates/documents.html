@@ -1,0 +1,167 @@
+{% extends "base.html" %} {% block title %}Documents{% endblock %} {% block
+header %}Stored Documents{% endblock %} {% block content %}
+<div class="document-actions">
+  <a href="/upload" class="btn btn-primary">Upload New Document</a>
+  <span class="selected-info" id="selectedInfo" style="display: none">
+    <span id="selectedCount">0</span> document(s) selected
+  </span>
+</div>
+
+<div class="document-list">
+  <form id="documentForm" action="/select-document" method="post">
+    {% for doc in documents %}
+    <div class="document-card" data-doc-id="{{ doc._id }}">
+      <div class="document-header">
+        <h3 class="document-title">{{ doc.title }}</h3>
+        <div class="document-actions">
+          <button
+            type="submit"
+            name="document_id"
+            value="{{ doc._id }}"
+            class="btn btn-select"
+          >
+            Select for Query
+          </button>
+        </div>
+      </div>
+      <div class="document-meta">
+        <span class="meta-item">Uploaded by {{ doc.uploaded_by }}</span>
+        <span class="meta-item">File: {{ doc.filename }}</span>
+        <span class="meta-item">Uploaded: {{ doc.upload_date }}</span>
+      </div>
+      <p><strong>Description:</strong> {{ doc.description }}</p>
+      <div class="document-content-preview">
+        {{ doc.content|truncate(300) }} {% if doc.content|length > 300 %}
+        <span class="expand-text">[...]</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </form>
+</div>
+<a href="/dashboard" class="back-link">← Back to Dashboard</a>
+{% endblock %} {% block extra_css %}
+<style>
+  .document-actions {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .document-list {
+    margin-top: 1rem;
+  }
+  .document-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.2s ease;
+  }
+  .document-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .document-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .document-title {
+    font-size: 1.25rem;
+    margin: 0;
+    color: #2c3e50;
+  }
+  .document-meta {
+    color: #7f8c8d;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+  }
+  .document-content-preview {
+    white-space: pre-line;
+    max-height: 150px;
+    overflow: hidden;
+    padding: 0.5rem;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    position: relative;
+  }
+  .expand-text {
+    position: absolute;
+    right: 8px;
+    bottom: 4px;
+    background: linear-gradient(90deg, transparent, #f9f9f9 40%);
+    padding-left: 20px;
+    color: #666;
+  }
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+  }
+  .btn-primary {
+    background-color: #3498db;
+    color: white;
+  }
+  .btn-primary:hover {
+    background-color: #2980b9;
+  }
+  .btn-select {
+    background-color: #2ecc71;
+    color: white;
+  }
+  .btn-select:hover {
+    background-color: #27ae60;
+  }
+  .back-link {
+    display: inline-block;
+    margin-top: 1.5rem;
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .back-link:hover {
+    text-decoration: underline;
+  }
+  .selected-info {
+    background-color: #f8f9fa;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+</style>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Highlight selected documents
+    const selectedDocId = getCookie("selected_document");
+    if (selectedDocId) {
+      const selectedCard = document.querySelector(
+        `.document-card[data-doc-id="${selectedDocId}"]`
+      );
+      if (selectedCard) {
+        selectedCard.style.borderLeft = "4px solid #2ecc71";
+        document.getElementById("selectedInfo").style.display = "inline-block";
+        document.getElementById("selectedCount").textContent = "1";
+      }
+    }
+
+    // Function to get cookie value
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(";").shift();
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,475 @@
+{% extends "base.html" %} {% block title %}Ask a Question{% endblock %} {% block
+header %}Ask a Question{% endblock %} {% block content %}
+<div class="document-info">
+  {% if selected_document %}
+  <div class="alert alert-document">
+    Querying document: <strong>{{ selected_document }}</strong>
+    <a href="/documents" class="change-document">Change document</a>
+  </div>
+  {% else %}
+  <div class="alert alert-warning">
+    No document selected. <a href="/documents">Select a document first</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="chat-container">
+  <button id="clear-conversation" class="clear-btn">Clear Conversation</button>
+
+  <div id="chat-history" class="chat-history">
+    {% if conversation %} {% for message in conversation %}
+    <div
+      class="message {{ 'user-message' if message.role == 'user' else 'bot-message' }}"
+    >
+      <div class="message-timestamp">
+        {{ message.timestamp if message.timestamp else "" }}
+      </div>
+      <div class="message-content">{{ message.content }}</div>
+    </div>
+    {% endfor %} {% endif %} {% if error %}
+    <div class="message error-message">
+      <div class="message-timestamp">{{ now() }}</div>
+      <div class="message-content">{{ error }}</div>
+    </div>
+    {% endif %} {% if warning %}
+    <div class="message warning-message">
+      <div class="message-timestamp">{{ now() }}</div>
+      <div class="message-content">{{ warning }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <form
+    id="query-form"
+    class="query-form"
+    {%
+    if
+    not
+    selected_document
+    %}style="display:none;"
+    {%
+    endif
+    %}
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token}}" />
+    <input
+      type="hidden"
+      id="document_id"
+      name="document_id"
+      value="{{ selected_document.id if selected_document else '' }}"
+    />
+
+    <div class="form-group">
+      <textarea
+        id="query"
+        name="query"
+        rows="3"
+        placeholder="Ask your question about this document..."
+        required
+        maxlength="1000"
+      ></textarea>
+      <div id="char-counter" class="char-counter">0/1000</div>
+      <button
+        type="submit"
+        id="submit-btn"
+        {%
+        if
+        not
+        selected_document
+        %}disabled{%
+        endif
+        %}
+      >
+        <span class="submit-text">Submit</span>
+        <span class="spinner" style="display: none">
+          <i class="fas fa-spinner fa-spin"></i>
+        </span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<a href="/dashboard" class="back-link">← Back to Dashboard</a>
+{% endblock %} {% block extra_css %}
+<style>
+  .document-info {
+    margin-bottom: 1.5rem;
+  }
+
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .alert-document {
+    background-color: #e8f5e9;
+    border-left: 4px solid #2ecc71;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .alert-warning {
+    background-color: #fff3e0;
+    border-left: 4px solid #ff9800;
+  }
+
+  .change-document {
+    color: #27ae60;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .change-document:hover {
+    text-decoration: underline;
+  }
+
+  .chat-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: 65vh;
+  }
+
+  .chat-history {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+
+  .message {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    max-width: 80%;
+  }
+
+  .user-message {
+    background-color: #e3f2fd;
+    margin-left: auto;
+    border-bottom-right-radius: 0;
+  }
+
+  .bot-message {
+    background-color: #f1f1f1;
+    margin-right: auto;
+    border-bottom-left-radius: 0;
+  }
+
+  .error-message {
+    background-color: #ffebee;
+    border-left: 4px solid #f44336;
+    max-width: 100%;
+  }
+
+  .warning-message {
+    background-color: #fff3e0;
+    border-left: 4px solid #ff9800;
+    max-width: 100%;
+  }
+
+  .message-content {
+    white-space: pre-wrap;
+  }
+
+  .message-timestamp {
+    font-size: 0.75rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+  }
+
+  .query-form {
+    margin-top: 1rem;
+  }
+
+  .form-group {
+    position: relative;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    resize: none;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+
+  button[type="submit"] {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  button[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+
+  button[type="submit"]:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+
+  .context {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+  }
+
+  .context ul {
+    padding-left: 1.5rem;
+  }
+
+  .context li {
+    margin-bottom: 0.25rem;
+  }
+
+  .source-document {
+    font-weight: bold;
+    color: #2ecc71;
+  }
+
+  .clear-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    align-self: flex-end;
+  }
+
+  .clear-btn:hover {
+    background-color: #d32f2f;
+  }
+
+  .char-counter {
+    position: absolute;
+    right: 10px;
+    bottom: 50px;
+    font-size: 0.75rem;
+    color: #666;
+  }
+</style>
+{% endblock %} {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("query-form");
+    const queryInput = document.getElementById("query");
+    const chatHistory = document.getElementById("chat-history");
+    const submitBtn = document.getElementById("submit-btn");
+    const clearBtn = document.getElementById("clear-conversation");
+    const charCounter = document.getElementById("char-counter");
+    const documentIdInput = document.getElementById("document_id");
+
+    // Initialize character counter
+    queryInput.addEventListener("input", updateCharCounter);
+    updateCharCounter();
+
+    function updateCharCounter() {
+      const length = queryInput.value.length;
+      charCounter.textContent = `${length}/1000`;
+      if (length > 900) {
+        charCounter.style.color = "#f44336";
+      } else if (length > 750) {
+        charCounter.style.color = "#ff9800";
+      } else {
+        charCounter.style.color = "#666";
+      }
+    }
+
+    // Auto-resize textarea with debounce
+    let resizeTimeout;
+    queryInput.addEventListener("input", function () {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        this.style.height = "auto";
+        this.style.height = this.scrollHeight + "px";
+      }, 100);
+    });
+
+    // Clear conversation
+    clearBtn.addEventListener("click", function () {
+      chatHistory.innerHTML = "";
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const query = queryInput.value.trim();
+      if (!query) return;
+
+      // Add user message to chat
+      addMessage("user", query);
+      queryInput.value = "";
+      queryInput.style.height = "auto";
+      updateCharCounter();
+
+      // Show loading state
+      submitBtn.disabled = true;
+      document.querySelector(".submit-text").style.display = "none";
+      document.querySelector(".spinner").style.display = "block";
+
+      // Scroll to bottom
+      scrollToBottom();
+
+      // Get CSRF token and document ID from form
+      var csrfToken = document.querySelector('input[name="csrf_token"]').value;
+      var documentId = documentIdInput.value;
+      console.log("documentId: ", documentId);
+
+      if (!documentId) {
+        addMessage(
+          "error",
+          "No document selected. Please select a document first."
+        );
+        submitBtn.disabled = false;
+        document.querySelector(".submit-text").style.display = "inline";
+        document.querySelector(".spinner").style.display = "none";
+        return;
+      }
+
+      console.log("Sending document_id:", documentId); // Debugging
+
+      // Send AJAX request
+      fetch("/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-CSRF-Token": csrfToken, // Alternative CSRF protection
+        },
+        body: JSON.stringify({
+          query: query,
+          document_id: documentId,
+          csrf_token: csrfToken, // Include in body as well
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          // Add bot response to chat
+          if (data.response) {
+            addMessage("bot", data.response);
+          } else if (data.error) {
+            addMessage("error", data.error);
+          } else if (data.warning) {
+            addMessage("warning", data.warning);
+          }
+
+          // Add context if available
+          if (data.sources && data.sources.length > 0) {
+            let contextHtml =
+              '<div class="context"><strong>Context from:</strong><ul>';
+            data.sources.forEach((source) => {
+              contextHtml += `<li><span class="source-document">${
+                source.title
+              }</span>: ${source.content.substring(0, 100)}...</li>`;
+            });
+            contextHtml += "</ul></div>";
+
+            // Get last bot message and append context
+            const botMessages = document.querySelectorAll(".bot-message");
+            if (botMessages.length > 0) {
+              const lastBotMessage = botMessages[botMessages.length - 1];
+              lastBotMessage.querySelector(".message-content").innerHTML +=
+                contextHtml;
+            }
+          }
+
+          scrollToBottom();
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          addMessage(
+            "error",
+            "Sorry, there was an error processing your request: " +
+              error.message
+          );
+          scrollToBottom();
+        })
+        .finally(() => {
+          // Reset button state
+          submitBtn.disabled = false;
+          document.querySelector(".submit-text").style.display = "inline";
+          document.querySelector(".spinner").style.display = "none";
+        });
+    });
+
+    function addMessage(role, content) {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `message ${role}-message`;
+
+      // Add timestamp
+      const timestamp = new Date().toLocaleTimeString();
+      const timestampDiv = document.createElement("div");
+      timestampDiv.className = "message-timestamp";
+      timestampDiv.textContent = timestamp;
+      messageDiv.appendChild(timestampDiv);
+
+      const contentDiv = document.createElement("div");
+      contentDiv.className = "message-content";
+      // Sanitize HTML and render markdown
+      contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(content));
+
+      messageDiv.appendChild(contentDiv);
+      chatHistory.appendChild(messageDiv);
+    }
+
+    function scrollToBottom() {
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    // Initialize with any existing messages
+    scrollToBottom();
+
+    // Show/hide form based on document selection
+    function checkDocumentSelection() {
+      const selectedDocId = documentIdInput.value;
+      if (selectedDocId) {
+        document.getElementById("query-form").style.display = "block";
+        document.getElementById("submit-btn").disabled = false;
+      }
+    }
+
+    // Check on page load
+    checkDocumentSelection();
+  });
+</script>
+{% endblock %}

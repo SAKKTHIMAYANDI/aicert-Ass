@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}FastAPI RAG System{% endblock %}</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+      header {
+        background-color: #007bff;
+        color: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+      .logout-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .logout-btn:hover {
+        background-color: #c82333;
+      }
+      h1 {
+        margin: 0;
+      }
+      h2 {
+        color: #333;
+        margin-top: 0;
+      }
+      .info-item {
+        margin-bottom: 0.5rem;
+      }
+      .info-label {
+        font-weight: bold;
+        color: #555;
+      }
+      .user-info {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+      .action-btn {
+        background-color: #28a745;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        text-align: center;
+      }
+      .action-btn:hover {
+        background-color: #218838;
+      }
+      .back-link {
+        display: inline-block;
+        margin-top: 1rem;
+        color: #007bff;
+        text-decoration: none;
+      }
+    </style>
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <header>
+      <h1>{% block header %}FastAPI RAG System{% endblock %}</h1>
+      <div>
+        {% if username %}
+        <span style="margin-right: 1rem">Welcome, {{ username }}</span>
+        <a href="/logout" class="logout-btn">Logout</a>
+        {% else %}
+        <a href="/login" class="action-btn">Login</a>
+        <a href="/register" class="action-btn">Register</a>
+        {% endif %}
+      </div>
+    </header>
+    <div class="container">{% block content %}{% endblock %}</div>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>
